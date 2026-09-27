@@ -73,6 +73,17 @@ websub_event_receiver_https_endpoint = "https://localhost:8021"
 [apim.sync_runtime_artifacts.gateway]
 gateway_labels =["Default"]
 
+# Enable policy sandbox only on a dedicated, non-production gateway environment.
+# Note: must be declared after the [apim] table above, or the deployment.toml
+# parser (net.consensys.cava.toml) recurses infinitely (StackOverflowError) on
+# an out-of-order super-table declaration.
+#[apim.policy_sandbox]
+#enable = false
+#timeout = 30000
+#execution_timeout = 20000
+#max_concurrent_runs = 4
+#max_log_lines = 500
+
 [[oauth.extensions.token_types]]
 name = "JWT"
 issuer = "org.wso2.is.key.manager.tokenpersistence.issuer.ExtendedJWTTokenIssuer"

@@ -2,6 +2,14 @@
 hostname = "localhost"
 server_role = "default"
 
+# Enable policy sandbox only on a dedicated, non-production gateway environment.
+#[apim.policy_sandbox]
+#enable = false
+#timeout = 30000
+#execution_timeout = 20000
+#max_concurrent_runs = 4
+#max_log_lines = 500
+
 [user_store]
 type = "database_unique_id"
 
