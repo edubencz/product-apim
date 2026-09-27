@@ -22,9 +22,11 @@ if (-not (Test-Path -LiteralPath $launcher -PathType Leaf)) {
     Write-Host "Extraindo $archive para $run..."
     New-Item -ItemType Directory -Path $run -Force | Out-Null
     Expand-Archive -LiteralPath $archive -DestinationPath $run -Force
+}
 
-    # Local: habilita o sandbox do policy editor (a secao precisa ficar depois de [apim]).
-    $toml = Join-Path $distributionHome 'repository\conf\deployment.toml'
+# Habilita o sandbox do Policy Builder em toda inicializacao (idempotente; a secao precisa ficar depois de [apim]).
+$toml = Join-Path $distributionHome 'repository\conf\deployment.toml'
+if (Test-Path -LiteralPath $toml -PathType Leaf) {
     $content = [System.IO.File]::ReadAllText($toml)
     if ($content -notmatch '(?m)^\[apim\.policy_sandbox\]') {
         $content = $content.TrimEnd() + "`n`n[apim.policy_sandbox]`nenable = true`n"

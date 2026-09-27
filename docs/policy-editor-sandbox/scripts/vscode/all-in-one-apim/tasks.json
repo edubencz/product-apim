@@ -47,6 +47,50 @@
                 "panel": "dedicated"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "All in One: Parar",
+            "type": "shell",
+            "command": "Get-CimInstance Win32_Process -Filter \"Name='java.exe'\" | Where-Object { $_.CommandLine -match 'ALL-IN~1|all-in-one-apim' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; Write-Host \"Parado All-in-one PID $($_.ProcessId)\" }; Write-Host 'All-in-one parado (se estava rodando).'",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "All in One: Build completo (Policy Builder)",
+            "detail": "~40 min. Builda carbon-apimgt, o publisher do apim-apps e a distribuicao all-in-one",
+            "type": "shell",
+            "command": "& '${workspaceFolder}\\..\\api-control-plane\\.vscode\\build-policy-builder.ps1' -Target aio",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "All in One: Build completo + Iniciar (Policy Builder)",
+            "detail": "Para o all-in-one, builda tudo e sobe com o sandbox do Policy Builder habilitado",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "All in One: Parar",
+                "All in One: Build completo (Policy Builder)",
+                "All in One: Iniciar"
+            ],
+            "problemMatcher": []
         }
     ]
 }

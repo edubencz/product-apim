@@ -4,7 +4,7 @@
         {
             "label": "ACP: Stop Server",
             "type": "shell",
-            "command": "Get-Process | Where-Object { $_.ProcessName -like '*java*' } | Stop-Process -Force -ErrorAction SilentlyContinue; Write-Host 'Stopped (if it was running).'",
+            "command": "Get-CimInstance Win32_Process -Filter \"Name='java.exe'\" | Where-Object { $_.CommandLine -match 'API-CO|api-control-plane' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; Write-Host \"Stopped CP PID $($_.ProcessId)\" }; Write-Host 'Control Plane stopped (if it was running).'",
             "options": {
                 "shell": {
                     "executable": "powershell.exe",
@@ -83,6 +83,101 @@
                 "ACP: Rebuild (mvn install)",
                 "ACP: Extract Fresh Distribution",
                 "ACP: Start Server"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "GW: Stop Gateway",
+            "type": "shell",
+            "command": "Get-CimInstance Win32_Process -Filter \"Name='java.exe'\" | Where-Object { $_.CommandLine -match 'runtime\\\\gateway' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; Write-Host \"Stopped Gateway PID $($_.ProcessId)\" }; Write-Host 'Gateway stopped (if it was running).'",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "GW: Start Gateway",
+            "detail": "Gateway separado com offset 1 (9444 / 8281), usado pelo sandbox do Policy Builder",
+            "type": "shell",
+            "command": "$env:JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21.0.10'; $env:PATH = 'C:\\Program Files\\Java\\jdk-21.0.10\\bin;' + $env:PATH; Set-Location 'C:\\workspace\\runtime\\gateway\\wso2am-universal-gw-4.7.0-SNAPSHOT\\bin'; .\\gateway.bat",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-Command"]
+                }
+            },
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "____NEVER_MATCH____"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "Starting WSO2 Carbon",
+                    "endsPattern": "WSO2 Carbon started"
+                }
+            }
+        },
+        {
+            "label": "Policy Builder: Build completo (carbon-apimgt + apim-apps + ACP)",
+            "detail": "~40 min. Builda carbon-apimgt, o publisher do apim-apps e o api-control-plane; extrai e habilita o sandbox",
+            "type": "shell",
+            "command": "& '${workspaceFolder}\\.vscode\\build-policy-builder.ps1' -Target acp",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Policy Builder: Build só do ACP (usa carbon-apimgt/apim-apps do ~/.m2)",
+            "type": "shell",
+            "command": "& '${workspaceFolder}\\.vscode\\build-policy-builder.ps1' -Target acp -SkipCarbon -SkipUi",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Policy Builder: Start CP + Gateway",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "ACP: Start Server",
+                "GW: Start Gateway"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Policy Builder: Build completo + Start CP + Gateway",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "ACP: Stop Server",
+                "Policy Builder: Build completo (carbon-apimgt + apim-apps + ACP)",
+                "Policy Builder: Start CP + Gateway"
             ],
             "problemMatcher": []
         }
