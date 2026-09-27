@@ -1,0 +1,52 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "All in One: Iniciar",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}\\.vscode\\start-all-in-one.ps1",
+                "-WorkspaceFolder",
+                "${workspaceFolder}"
+            ],
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "All in One: Compilar",
+            "type": "shell",
+            "command": "mvn",
+            "args": [
+                "-f",
+                "${workspaceFolder}\\pom.xml",
+                "clean",
+                "install",
+                "-DskipTests",
+                "-DskipBenchMarkTest=true",
+                "-DskipIntegrationTests=true",
+                "-DskipRestartTests=true"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "JAVA_HOME": "C:\\Program Files\\Java\\jdk-21.0.10"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+<filter xmlns="http://ws.apache.org/ns/synapse" source="get-property('axis2','HTTP_METHOD')" regex="GET">
+    <then>
+        <log level="custom">
+            <property name="BRANCH" value="then-should-not-run-for-POST"/>
+        </log>
+        <payloadFactory media-type="json">
+            <format>{"branch":"then"}</format>
+            <args/>
+        </payloadFactory>
+        <respond/>
+    </then>
+    <else>
+        <log level="custom">
+            <property name="BRANCH" value="else-responds-early"/>
+        </log>
+        <payloadFactory media-type="json">
+            <format>{"branch":"else","respondedEarly":true}</format>
+            <args/>
+        </payloadFactory>
+        <property name="HTTP_SC" value="200" scope="axis2"/>
+        <respond/>
+    </else>
+</filter>

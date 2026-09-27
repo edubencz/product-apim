@@ -1,0 +1,90 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ACP: Stop Server",
+            "type": "shell",
+            "command": "Get-Process | Where-Object { $_.ProcessName -like '*java*' } | Stop-Process -Force -ErrorAction SilentlyContinue; Write-Host 'Stopped (if it was running).'",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ACP: Start Server",
+            "type": "shell",
+            "command": "$env:JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21.0.10'; $env:PATH = 'C:\\Program Files\\Java\\jdk-21.0.10\\bin;' + $env:PATH; Set-Location '${workspaceFolder}\\modules\\distribution\\product\\target\\run\\wso2am-acp-4.7.0-SNAPSHOT\\bin'; .\\api-cp.bat",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-Command"]
+                }
+            },
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "____NEVER_MATCH____"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "Starting WSO2 Carbon",
+                    "endsPattern": "WSO2 Carbon started|Mgt Console URL"
+                }
+            }
+        },
+        {
+            "label": "ACP: Rebuild (mvn install)",
+            "type": "shell",
+            "command": "$env:JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21.0.10'; $env:PATH = 'C:\\Program Files\\Java\\jdk-21.0.10\\bin;' + $env:PATH; Set-Location '${workspaceFolder}'; mvn clean install -DskipTests",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ACP: Extract Fresh Distribution",
+            "type": "shell",
+            "command": "Remove-Item -Recurse -Force '${workspaceFolder}\\modules\\distribution\\product\\target\\run\\wso2am-acp-4.7.0-SNAPSHOT' -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path '${workspaceFolder}\\modules\\distribution\\product\\target\\run' | Out-Null; Expand-Archive -Path '${workspaceFolder}\\modules\\distribution\\product\\target\\wso2am-acp-4.7.0-SNAPSHOT.zip' -DestinationPath '${workspaceFolder}\\modules\\distribution\\product\\target\\run' -Force; Write-Host 'Extracted fresh distribution.'; & '${workspaceFolder}\\.vscode\\enable-policy-sandbox.ps1'",
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": ["-NoProfile", "-Command"]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ACP: Rebuild & Restart",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "ACP: Stop Server",
+                "ACP: Rebuild (mvn install)",
+                "ACP: Extract Fresh Distribution",
+                "ACP: Start Server"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
